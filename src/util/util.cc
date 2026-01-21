@@ -1557,7 +1557,8 @@ ssize_t parse_content_disposition(char* dest, size_t destlen,
   case CD_TOKEN:
     return destlen - dlen;
   case CD_BEFORE_DISPOSITION_PARM_NAME:
-    if (dlen == destlen) return -1;
+    if (dlen == destlen)
+      return -1;
     return destlen - dlen;
   case CD_VALUE_CHARS:
     if (charset == CD_ENC_UTF8 && dfa_state != UTF8_ACCEPT) {
@@ -1816,10 +1817,14 @@ std::string getXDGDir(const std::string& environmentVariable,
 
 std::string getConfigFile()
 {
-  std::string filename = getHomeDir() + "/.aria2/aria2.conf";
+  std::string filename = File::getCurrentDir() + "/.aria2/aria2.conf";
   if (!File(filename).exists()) {
-    filename = getXDGDir("XDG_CONFIG_HOME", getHomeDir() + "/.config") +
-               "/aria2/aria2.conf";
+    filename = File::getCurrentDir() + "/aria2.conf";
+  }
+  if (!File(filename).exists()) {
+    filename =
+        getXDGDir("XDG_CONFIG_HOME", File::getCurrentDir() + "/.config") +
+        "/aria2/aria2.conf";
   }
   return filename;
 }
@@ -1827,9 +1832,12 @@ std::string getConfigFile()
 std::string getDHTFile(bool ipv6)
 {
   std::string filename =
-      getHomeDir() + (ipv6 ? "/.aria2/dht6.dat" : "/.aria2/dht.dat");
+      File::getCurrentDir() + (ipv6 ? "/.aria2/dht6.dat" : "/.aria2/dht.dat");
   if (!File(filename).exists()) {
-    filename = getXDGDir("XDG_CACHE_HOME", getHomeDir() + "/.cache") +
+    filename = File::getCurrentDir() + (ipv6 ? "/dht6.dat" : "/dht.dat");
+  }
+  if (!File(filename).exists()) {
+    filename = getXDGDir("XDG_CACHE_HOME", File::getCurrentDir() + "/.cache") +
                (ipv6 ? "/aria2/dht6.dat" : "/aria2/dht.dat");
   }
   return filename;
@@ -2679,8 +2687,8 @@ std::string generateRequestGroupPath(const std::shared_ptr<Option>& opt,
   std::string suffixPath = opt->get(PREF_OUT);
   auto suffixPathIsAbsolute = util::isAbsolute(suffixPath);
   auto scope = opt->getAsInt(PREF_CATEGORY_DIR_SCOPE);
-  if ((scope & 2) > 0 && !suffixPath.empty() && !opt->blank(PREF_CATEGORY_DIR) &&
-      !suffixPathIsAbsolute) {
+  if ((scope & 2) > 0 && !suffixPath.empty() &&
+      !opt->blank(PREF_CATEGORY_DIR) && !suffixPathIsAbsolute) {
     std::string catrgoryDir =
         mathCatrgoryDir(opt->get(PREF_CATEGORY_DIR), suffixPath);
     if (!catrgoryDir.empty() && !util::startsWith(suffixPath, catrgoryDir)) {
@@ -2702,8 +2710,8 @@ void commonFileEntrySetPath(const std::shared_ptr<FileEntry>& fileEntry,
 {
   auto scope = opt->getAsInt(PREF_CATEGORY_DIR_SCOPE);
   auto suffixPathIsAbsolute = util::isAbsolute(suffixPath);
-  if ((scope & 1) > 0 && !suffixPath.empty() && !opt->blank(PREF_CATEGORY_DIR) &&
-      !suffixPathIsAbsolute) {
+  if ((scope & 1) > 0 && !suffixPath.empty() &&
+      !opt->blank(PREF_CATEGORY_DIR) && !suffixPathIsAbsolute) {
     std::string catrgoryDir =
         mathCatrgoryDir(opt->get(PREF_CATEGORY_DIR), suffixPath);
     if (!catrgoryDir.empty() && !util::startsWith(suffixPath, catrgoryDir)) {
@@ -2725,11 +2733,12 @@ void commonFileEntrySetPath(const std::shared_ptr<FileEntry>& fileEntry,
 }
 
 #if defined(__APPLE__)
-#include <mach-o/dyld.h>
-#include <sys/syslimits.h>
+#  include <mach-o/dyld.h>
+#  include <sys/syslimits.h>
 #endif
 
-std::string getProgramLocation() {
+std::string getProgramLocation()
+{
 #ifdef _WIN32
   wchar_t out[MAX_PATH];
   if (GetModuleFileNameW(nullptr, out, MAX_PATH) == 0) {
