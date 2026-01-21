@@ -319,21 +319,38 @@ error_code::Value option_processing(Option& op, bool standalone,
     }
   }
   if (standalone && op.getAsBool(PREF_DAEMON)) {
-#if defined(__GNUC__) && defined(__APPLE__)
+#ifdef __MINGW32__
+    std::wstring daemonCmdLine = GetCommandLineW();
+    daemonCmdLine.append(L" --daemon=false");
+    STARTUPINFOW si = {};
+    PROCESS_INFORMATION pi = {};
+    si.dwFlags = STARTF_USESHOWWINDOW;
+    si.wShowWindow = FALSE;
+    BOOL bRet =
+        CreateProcessW(NULL, const_cast<LPWSTR>(daemonCmdLine.c_str()), NULL,
+                       NULL, FALSE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi);
+    if (bRet) {
+      CloseHandle(pi.hThread);
+      CloseHandle(pi.hProcess);
+      ExitProcess(0);
+    }
+#else // !__MINGW32__
+#  if defined(__GNUC__) && defined(__APPLE__)
 // daemon() is deprecated on OSX since... forever.
 // Silence the warning for good, so that -Werror becomes feasible.
-#  pragma GCC diagnostic push
-#  pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-#endif // defined(__GNUC__) && defined(__APPLE__)
+#    pragma GCC diagnostic push
+#    pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#  endif // defined(__GNUC__) && defined(__APPLE__)
     const auto daemonized = daemon(0, 0);
-#if defined(__GNUC__) && defined(__APPLE__)
-#  pragma GCC diagnostic pop
-#endif // defined(__GNUC__) && defined(__APPLE__)
+#  if defined(__GNUC__) && defined(__APPLE__)
+#    pragma GCC diagnostic pop
+#  endif // defined(__GNUC__) && defined(__APPLE__)
 
     if (daemonized < 0) {
       perror(MSG_DAEMON_FAILED);
       return error_code::UNKNOWN_ERROR;
     }
+#endif   // __MINGW32__
   }
   if (op.getAsBool(PREF_DEFERRED_INPUT) && op.defined(PREF_SAVE_SESSION)) {
     A2_LOG_WARN("--deferred-input is disabled because of the presence of "
