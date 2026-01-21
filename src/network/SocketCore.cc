@@ -1017,7 +1017,11 @@ bool SocketCore::tlsHandshake(TLSContext* tlsctx, const std::string& hostname)
 
     if (rv == TLS_ERR_ERROR) {
       // Damn those error.
-      throw DL_ABORT_EX(fmt("SSL/TLS handshake failure: %s",
+      A2_LOG_WARN(fmt("SSL/TLS handshake failure: %s",
+                      handshakeError.empty()
+                          ? tlsSession_->getLastErrorString().c_str()
+                          : handshakeError.c_str()));
+      throw DL_RETRY_EX(fmt("SSL/TLS handshake failure: %s",
                             handshakeError.empty()
                                 ? tlsSession_->getLastErrorString().c_str()
                                 : handshakeError.c_str()));

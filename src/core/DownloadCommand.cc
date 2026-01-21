@@ -306,7 +306,10 @@ void DownloadCommand::checkLowestDownloadSpeed() const
           startupIdleTime_) {
     int nowSpeed = peerStat_->calculateDownloadSpeed();
     if (nowSpeed <= lowestDownloadSpeedLimit_) {
-      throw DL_ABORT_EX2(fmt(EX_TOO_SLOW_DOWNLOAD_SPEED, nowSpeed,
+      A2_LOG_WARN(fmt(EX_TOO_SLOW_DOWNLOAD_SPEED, nowSpeed,
+                      lowestDownloadSpeedLimit_,
+                      getRequest()->getHost().c_str()));
+      throw DL_RETRY_EX2(fmt(EX_TOO_SLOW_DOWNLOAD_SPEED, nowSpeed,
                              lowestDownloadSpeedLimit_,
                              getRequest()->getHost().c_str()),
                          error_code::TOO_SLOW_DOWNLOAD_SPEED);
