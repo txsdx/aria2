@@ -15,7 +15,7 @@ option("ssl_external")
 option_end()
 
 option("use_quictls")
-    set_default(false)
+    set_default(true)
     set_showmenu(true)
     set_description("Use external use_quictls library")
 option_end()
