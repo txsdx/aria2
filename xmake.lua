@@ -39,6 +39,12 @@ option("unit")
     set_description("Build unit test")
 option_end()
 
+option("merge_staticlib")
+    set_default(false)
+    set_showmenu(true)
+    set_description("Build with merged static library")
+option_end()
+
 local ssl_external = get_config("ssl_external") or is_plat("linux", "android")
 
 includes("package.lua")
@@ -244,7 +250,9 @@ target("aria2")
     else
         add_defines("ARIA2_BUILDING_LIBRARY")
     end
-    add_rules("merge_staticlib")
+    if get_config("merge_staticlib") then
+        add_rules("merge_staticlib")
+    end
     add_files("deps/wslay/lib/*.c")
     if is_mode("release") and get_config("with_breakpad") then
         if is_plat("windows") then
@@ -475,5 +483,15 @@ target("test")
     add_packages("cppunit")
     add_tests("default")
     add_defines("HAVE_CONFIG_H=1")
+target_end()
+
+target("main")
+    set_default(false)
+    add_deps("aria2")
+    add_defines("HAVE_CONFIG_H=1")
+    add_files("main.cc")
+    if is_plat("windows", "mingw") then
+        add_files("src/resource.rc")
+    end
 target_end()
 end

@@ -11,16 +11,7 @@ jobs:
         run: |
           git config --global core.autocrlf false
           git config --global core.eol lf
-      - uses: actions/checkout@v4
-      - name: Cache build and xmake
-        uses: actions/cache@v4
-        with:
-          path: |
-            build
-            .xmake
-          key: build-xmake-${{ runner.os }}-${{ hashFiles('xmake.lua') }}
-          restore-keys: |
-            build-xmake-${{ runner.os }}-
+      - uses: actions/checkout@v7
       - name: xmake
         uses: xmake-io/github-action-setup-xmake@v1
         with:
@@ -57,7 +48,7 @@ jobs:
         run: xmake f -a x64 -y && xmake pack aria2
       - name: cp
         run: New-Item -ItemType Directory -Path dist && cp build/xpack/aria2/*.zip dist/
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: aria2c-windows-${{ github.run_id }}
           path: |
@@ -65,7 +56,7 @@ jobs:
   # build-linux:
   #   runs-on: ubuntu-latest
   #   steps:
-  #     - uses: actions/checkout@v4
+  #     - uses: actions/checkout@v7
   #     - name: prepare
   #       run: |
   #         sudo apt-get update
@@ -78,21 +69,9 @@ jobs:
   #       env:
   #         VERSION: ${{ github.ref_name }}
   #       run: xmake f -a x86_64 -c -y && xmake pack aria2
-  #     - name: setup arm-gnu-toolchain
-  #       run: |
-  #         curl -L -o arm-gnu-toolchain.txz https://developer.arm.com/-/media/Files/downloads/gnu/14.2.rel1/binrel/arm-gnu-toolchain-14.2.rel1-x86_64-aarch64-none-linux-gnu.tar.xz
-  #         tar -xf arm-gnu-toolchain.txz -C build && mv build/arm-gnu-toolchain-* build/arm-gnu-toolchain
-  #         ls build/arm-gnu-toolchain
-  #         rm arm-gnu-toolchain.txz
-  #     - name: build arm64
-  #       env:
-  #         VERSION: ${{ github.ref_name }}
-  #       run: |
-  #         xmake f -p linux -a arm64-v8a --sdk="$PWD/build/arm-gnu-toolchain" --with_static=y -c -y
-  #         xmake pack aria2
   #     - name: cp
   #       run: mkdir -p dist && cp build/xpack/aria2/*.zip dist/
-  #     - uses: actions/upload-artifact@v4
+  #     - uses: actions/upload-artifact@v7
   #       with:
   #         name: aria2c-linux-${{ github.run_id }}
   #         path: |
@@ -100,7 +79,7 @@ jobs:
   # build-macos:
   #   runs-on: macos-latest
   #   steps:
-  #     - uses: actions/checkout@v4
+  #     - uses: actions/checkout@v7
   #     - name: xmake
   #       run: brew install xmake && xmake --version
   #     - name: build x64
@@ -115,7 +94,7 @@ jobs:
   #     #   run: lipo -create -output dist/aria2c-macosx-universal dist/aria2c-macosx-x86_64 dist/aria2c-macosx-arm64
   #     - name: cp
   #       run: mkdir -p dist && cp build/xpack/aria2/*.zip dist/
-  #     - uses: actions/upload-artifact@v4
+  #     - uses: actions/upload-artifact@v7
   #       with:
   #         name: aria2c-macos-${{ github.run_id }}
   #         path: |
@@ -124,21 +103,20 @@ jobs:
   #   runs-on: ubuntu-latest
   #   permissions:
   #     contents: write
-  #   needs: [build-windows]
-  #   # needs: [build-macos, build-windows, build-linux]
+  #   needs: [build-macos, build-windows, build-linux]
   #   steps:
   #     - uses: actions/download-artifact@v4
   #       with:
   #         name: aria2c-windows-${{ github.run_id }}
   #         path: dist
-  #     # - uses: actions/download-artifact@v4
-  #     #   with:
-  #     #     name: aria2c-macos-${{ github.run_id }}
-  #     #     path: dist
-  #     # - uses: actions/download-artifact@v4
-  #     #   with:
-  #     #     name: aria2c-linux-${{ github.run_id }}
-  #     #     path: dist
+  #     - uses: actions/download-artifact@v4
+  #       with:
+  #         name: aria2c-macos-${{ github.run_id }}
+  #         path: dist
+  #     - uses: actions/download-artifact@v4
+  #       with:
+  #         name: aria2c-linux-${{ github.run_id }}
+  #         path: dist
   #     - name: list file
   #       run: |
   #         ls -R dist
