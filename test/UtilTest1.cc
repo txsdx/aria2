@@ -1059,7 +1059,7 @@ void UtilTest1::testParseContentDisposition1()
   // attwithfilenamepctandiso
   // attachment; filename="ä-%41.html"
   val = "attachment; filename=\"%C3%A4-%2541.html\"";
-  val = util::percentDecode(val.begin(), val.end(), false);
+  val = util::percentDecode(val.begin(), val.end());
   CPPUNIT_ASSERT_EQUAL((ssize_t)11, util::parse_content_disposition(
                                         dest, destlen, &cs, &cslen, val.c_str(),
                                         val.size(), true));
