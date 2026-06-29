@@ -1009,23 +1009,22 @@ void UtilTest1::testParseContentDisposition1()
 
   // attwithisofnplain
   // attachment; filename="foo-ä.html"
-  val = "attachment; filename=\"foo-%E4.html\"";
-  val = util::percentDecode(val.begin(), val.end());
-  CPPUNIT_ASSERT_EQUAL((ssize_t)10, util::parse_content_disposition(
-                                        dest, destlen, &cs, &cslen, val.c_str(),
-                                        val.size(), false));
-  CPPUNIT_ASSERT_EQUAL(std::string("foo-ä.html"),
-                       util::iso8859p1ToUtf8(std::string(&dest[0], &dest[10])));
-
-  // attwithutf8fnplain
-  // attachment; filename="foo-Ã¤.html"
   val = "attachment; filename=\"foo-%C3%A4.html\"";
   val = util::percentDecode(val.begin(), val.end());
   CPPUNIT_ASSERT_EQUAL((ssize_t)11, util::parse_content_disposition(
                                         dest, destlen, &cs, &cslen, val.c_str(),
                                         val.size(), false));
+  CPPUNIT_ASSERT_EQUAL(std::string("foo-ä.html"), std::string(&dest[0], &dest[11]));
+
+  // attwithutf8fnplain
+  // attachment; filename="foo-Ã¤.html"
+  val = "attachment; filename=\"foo-%C3%83%C2%A4.html\"";
+  val = util::percentDecode(val.begin(), val.end());
+  CPPUNIT_ASSERT_EQUAL((ssize_t)13, util::parse_content_disposition(
+                                        dest, destlen, &cs, &cslen, val.c_str(),
+                                        val.size(), true));
   CPPUNIT_ASSERT_EQUAL(std::string("foo-Ã¤.html"),
-                       util::iso8859p1ToUtf8(std::string(&dest[0], &dest[11])));
+                       std::string(&dest[0], &dest[13]));
 
   // attwithfnrawpctenca
   val = "attachment; filename=\"foo-%41.html\"";
@@ -1059,13 +1058,13 @@ void UtilTest1::testParseContentDisposition1()
 
   // attwithfilenamepctandiso
   // attachment; filename="ä-%41.html"
-  val = "attachment; filename=\"%E4-%2541.html\"";
-  val = util::percentDecode(val.begin(), val.end());
-  CPPUNIT_ASSERT_EQUAL((ssize_t)10, util::parse_content_disposition(
+  val = "attachment; filename=\"%C3%A4-%2541.html\"";
+  val = util::percentDecode(val.begin(), val.end(), false);
+  CPPUNIT_ASSERT_EQUAL((ssize_t)11, util::parse_content_disposition(
                                         dest, destlen, &cs, &cslen, val.c_str(),
-                                        val.size(), false));
+                                        val.size(), true));
   CPPUNIT_ASSERT_EQUAL(std::string("ä-%41.html"),
-                       util::iso8859p1ToUtf8(std::string(&dest[0], &dest[10])));
+                       std::string(&dest[0], &dest[11]));
 
   // attwithfnrawpctenclong
   val = "attachment; filename=\"foo-%c3%a4-%e2%82%ac.html\"";
