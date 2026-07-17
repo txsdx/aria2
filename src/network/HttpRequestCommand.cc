@@ -155,7 +155,7 @@ bool HttpRequestCommand::executeInternal()
               getOption()->get(PREF_DIR),
               (getRequest()->getFile().empty()
                    ? Request::DEFAULT_FILE
-                   : util::percentDecode(std::begin(file), std::end(file))));
+                   : util::percentDecode(std::begin(file), std::end(file), true)));
         }
         else {
           path = getFileEntry()->getPath();

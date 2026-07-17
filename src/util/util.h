@@ -237,7 +237,7 @@ bool isIso8859p1(unsigned char c);
 bool isUtf8(const std::string& str);
 
 std::string percentDecode(std::string::const_iterator first,
-                          std::string::const_iterator last);
+                          std::string::const_iterator last, bool recursive = false);
 
 std::string torrentPercentEncode(const unsigned char* target, size_t len);
 

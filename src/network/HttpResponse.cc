@@ -119,7 +119,7 @@ std::string HttpResponse::determineFilename(bool contentDispositionUTF8) const
       contentDispositionUTF8);
   if (contentDisposition.empty()) {
     auto file = httpRequest_->getFile();
-    file = util::percentDecode(file.begin(), file.end());
+    file = util::percentDecode(file.begin(), file.end(), true);
     if (file.empty()) {
       return Request::DEFAULT_FILE;
     }

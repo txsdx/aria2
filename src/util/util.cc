@@ -482,10 +482,10 @@ std::string decodeURIComponent(std::string::const_iterator first,
 }
 
 std::string percentDecode(std::string::const_iterator first,
-                          std::string::const_iterator last)
+                          std::string::const_iterator last, bool recursive)
 {
   std::string decoded = decodeURIComponent(first, last);
-  if (decoded.find('%') == std::string::npos) {
+  if (decoded.find('%') == std::string::npos || !recursive) {
     return decoded;
   }
   first = decoded.begin();

@@ -192,7 +192,7 @@ bool HttpResponseCommand::executeInternal()
       auto suffixPath = util::createSafePath(
           file.empty()
               ? Request::DEFAULT_FILE
-              : util::percentDecode(std::begin(file), std::end(file)));
+              : util::percentDecode(std::begin(file), std::end(file), true));
       util::commonFileEntrySetPath(fe, getOption(), suffixPath, true);
     }
 
